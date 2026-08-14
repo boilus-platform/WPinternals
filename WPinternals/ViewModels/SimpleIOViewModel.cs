@@ -19,41 +19,54 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
-using WPinternals.Models.Lumia;
+using System.Collections.Generic;
+using System.Threading;
+using WPinternals.HelperClasses;
+using WPinternals.Models.Lumia.NCSd;
+using WPinternals.Models.SimpleIO;
+using WPinternals.Terminal;
 
 namespace WPinternals
 {
-    internal class NokiaModeMassStorageViewModel : ContextViewModel
-    {
-        private readonly MassStorage CurrentModel;
-        private readonly Action<PhoneInterfaces?> RequestModeSwitch;
+    // Create this class on the UI thread, after the main-window of the application is initialized.
+    // It is necessary to create the object on the UI thread, because notification events to the View need to be fired on that thread.
+    // The Model for this ViewModel communicates over USB and for that it uses the hWnd of the main window.
+    // Therefore the main window must be created before the ViewModel is created.
 
-        internal NokiaModeMassStorageViewModel(MassStorage CurrentModel, Action<PhoneInterfaces?> RequestModeSwitch)
+    internal class SimpleIOViewModel : ContextViewModel
+    {
+        private readonly SimpleIOModel CurrentModel;
+        private readonly Action<PhoneInterfaces> RequestModeSwitch;
+
+        internal SimpleIOViewModel(SimpleIOModel CurrentModel, Action<PhoneInterfaces> RequestModeSwitch)
             : base()
         {
-            this.CurrentModel = CurrentModel;
             this.RequestModeSwitch = RequestModeSwitch;
+
+            this.CurrentModel = CurrentModel;
+
+            new Thread(() => StartLoadDeviceInfo()).Start();
         }
 
-        private bool _SupportsReboot = false;
-        public bool SupportsReboot
+        private void StartLoadDeviceInfo()
+        {
+            (long curPosition, Guid guid, bool supportsFastFlash, bool supportsCompatFastFlash, int clientVersion, Guid DeviceUniqueID, string DeviceFriendlyName) ID = CurrentModel.GetIdV2();
+
+            PlatformName = ID.DeviceFriendlyName;
+        }
+
+
+        private string _PlatformName = null;
+        public string PlatformName
         {
             get
             {
-                return _SupportsReboot;
+                return _PlatformName;
             }
             set
             {
-                _SupportsReboot = value;
-                OnPropertyChanged(nameof(SupportsReboot));
-            }
-        }
-
-        internal override void EvaluateViewState()
-        {
-            if (IsActive)
-            {
-                SupportsReboot = CurrentModel.DoesDeviceSupportReboot();
+                _PlatformName = value;
+                OnPropertyChanged(nameof(PlatformName));
             }
         }
 
@@ -64,20 +77,8 @@ namespace WPinternals
                 case "Normal":
                     RequestModeSwitch(PhoneInterfaces.Lumia_Normal);
                     break;
-                case "PhoneInfo":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_PhoneInfo);
-                    break;
-                case "BootMgr":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_Bootloader);
-                    break;
-                case "Label":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_Label);
-                    break;
-                case "Flash":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_Flash);
-                    break;
-                case "Shutdown":
-                    RequestModeSwitch(null);
+                case "MassStorage":
+                    RequestModeSwitch(PhoneInterfaces.Lumia_MassStorage);
                     break;
                 default:
                     return;

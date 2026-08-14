@@ -49,7 +49,9 @@ namespace WPinternals
         Qualcomm_Download,
         Qualcomm_Flash,
         Lumia_BadMassStorage,
-        Lumia_PhoneInfo
+        Lumia_PhoneInfo,
+        SimpleIO,
+        UFP
     };
 
     // Create this class on the UI thread, after the main-window of the application is initialized.

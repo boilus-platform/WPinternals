@@ -19,8 +19,10 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
+using UnifiedFlashingPlatform;
 using WPinternals.HelperClasses;
 using WPinternals.Models.Lumia.NCSd;
+using WPinternals.Models.SimpleIO;
 using WPinternals.Models.UEFIApps.BootMgr;
 using WPinternals.Models.UEFIApps.Flash;
 using WPinternals.Models.UEFIApps.PhoneInfo;
@@ -108,6 +110,12 @@ namespace WPinternals
                     break;
                 case PhoneInterfaces.Lumia_MassStorage:
                     ActivateSubContext(new NokiaModeMassStorageViewModel((MassStorage)CurrentModel, OnModeSwitchRequested));
+                    break;
+                case PhoneInterfaces.SimpleIO:
+                    ActivateSubContext(new SimpleIOModeViewModel((SimpleIOModel)CurrentModel, OnModeSwitchRequested));
+                    break;
+                case PhoneInterfaces.UFP:
+                    ActivateSubContext(new UFPModeViewModel((UnifiedFlashingPlatformModel)CurrentModel, OnModeSwitchRequested));
                     break;
             }
         }

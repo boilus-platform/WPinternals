@@ -20,41 +20,20 @@
 
 using System;
 using WPinternals.Models.Lumia;
+using WPinternals.Models.SimpleIO;
 
 namespace WPinternals
 {
-    internal class NokiaModeMassStorageViewModel : ContextViewModel
+    internal class SimpleIOModeViewModel : ContextViewModel
     {
-        private readonly MassStorage CurrentModel;
+        private readonly SimpleIOModel CurrentModel;
         private readonly Action<PhoneInterfaces?> RequestModeSwitch;
 
-        internal NokiaModeMassStorageViewModel(MassStorage CurrentModel, Action<PhoneInterfaces?> RequestModeSwitch)
+        internal SimpleIOModeViewModel(SimpleIOModel CurrentModel, Action<PhoneInterfaces?> RequestModeSwitch)
             : base()
         {
             this.CurrentModel = CurrentModel;
             this.RequestModeSwitch = RequestModeSwitch;
-        }
-
-        private bool _SupportsReboot = false;
-        public bool SupportsReboot
-        {
-            get
-            {
-                return _SupportsReboot;
-            }
-            set
-            {
-                _SupportsReboot = value;
-                OnPropertyChanged(nameof(SupportsReboot));
-            }
-        }
-
-        internal override void EvaluateViewState()
-        {
-            if (IsActive)
-            {
-                SupportsReboot = CurrentModel.DoesDeviceSupportReboot();
-            }
         }
 
         public void RebootTo(string Mode)
@@ -64,20 +43,8 @@ namespace WPinternals
                 case "Normal":
                     RequestModeSwitch(PhoneInterfaces.Lumia_Normal);
                     break;
-                case "PhoneInfo":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_PhoneInfo);
-                    break;
-                case "BootMgr":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_Bootloader);
-                    break;
-                case "Label":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_Label);
-                    break;
-                case "Flash":
-                    RequestModeSwitch(PhoneInterfaces.Lumia_Flash);
-                    break;
-                case "Shutdown":
-                    RequestModeSwitch(null);
+                case "MassStorage":
+                    RequestModeSwitch(PhoneInterfaces.Lumia_MassStorage);
                     break;
                 default:
                     return;
